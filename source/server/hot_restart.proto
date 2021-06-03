@@ -29,9 +29,14 @@ message HotRestartMessage {
   message Reply {
     message PassListenSocket {
       int32 fd = 1;
+      // fixfix
+      repeated int32 all_fds = 2;
     }
     message ShutdownAdmin {
       uint64 original_start_time_unix_seconds = 1;
+      // See the comments on Server::Instance::enableReusePortDefault() for why this exists. The
+      // default is false for backwards compatibility.
+      bool enable_reuse_port_default = 2;
     }
     message Span {
       uint32 first = 1;

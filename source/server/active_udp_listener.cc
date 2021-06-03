@@ -68,7 +68,8 @@ ActiveRawUdpListener::ActiveRawUdpListener(uint32_t worker_index, uint32_t concu
                                            Event::Dispatcher& dispatcher,
                                            Network::ListenerConfig& config)
     : ActiveRawUdpListener(worker_index, concurrency, parent,
-                           config.listenSocketFactory().getListenSocket(), dispatcher, config) {}
+                           config.listenSocketFactory().getListenSocket(worker_index), dispatcher,
+                           config) {}
 
 ActiveRawUdpListener::ActiveRawUdpListener(uint32_t worker_index, uint32_t concurrency,
                                            Network::UdpConnectionHandler& parent,
@@ -103,9 +104,7 @@ ActiveRawUdpListener::ActiveRawUdpListener(uint32_t worker_index, uint32_t concu
 
   // If filter is nullptr, fail the creation of the listener
   if (read_filter_ == nullptr) {
-    throw Network::CreateListenerException(
-        fmt::format("Cannot create listener as no read filter registered for the udp listener: {} ",
-                    config_->name()));
+    ASSERT(false); // fixfix do this somewhere else.
   }
 
   // Create udp_packet_writer

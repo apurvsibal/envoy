@@ -54,7 +54,6 @@ filter_chains:
             match_subject_alt_names:
             - exact: localhost
             - exact: 127.0.0.1
-reuse_port: true
 udp_listener_config:
   quic_options: {}
   )EOF",
@@ -105,7 +104,7 @@ udp_listener_config:
                    ->listenerFactory()
                    .isTransportConnectionless());
   Network::SocketSharedPtr listen_socket =
-      manager_->listeners().front().get().listenSocketFactory().getListenSocket();
+      manager_->listeners().front().get().listenSocketFactory().getListenSocket(0);
 
   Network::UdpPacketWriterPtr udp_packet_writer =
       manager_->listeners()
@@ -156,7 +155,6 @@ filter_chains:
           match_subject_alt_names:
           - exact: localhost
           - exact: 127.0.0.1
-reuse_port: true
 udp_listener_config:
   quic_options: {}
   )EOF",

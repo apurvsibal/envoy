@@ -108,6 +108,7 @@ public:
   ProtobufMessage::ValidationContext& messageValidationContext() override {
     return validation_context_;
   }
+  bool enableReusePortDefault() override { return true; }
 
   Configuration::StatsConfig& statsConfig() override { return config_.statsConfig(); }
   Configuration::ServerFactoryContext& serverFactoryContext() override { return server_contexts_; }
@@ -147,6 +148,8 @@ public:
                                               const ListenSocketCreationParams&) override {
     // Returned sockets are not currently used so we can return nothing here safely vs. a
     // validation mock.
+    // TODO(mattklein123): The fact that this returns nullptr makes the production code more
+    // convoluted than it needs to be. Fix this to return a mock in a follow up.
     return nullptr;
   }
   DrainManagerPtr createDrainManager(envoy::config::listener::v3::Listener::DrainType) override {

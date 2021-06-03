@@ -35,7 +35,7 @@ Api::SysCallIntResult ListenSocketImpl::bind(Network::Address::InstanceConstShar
 void ListenSocketImpl::setListenSocketOptions(const Network::Socket::OptionsSharedPtr& options) {
   if (!Network::Socket::applyOptions(options, *this,
                                      envoy::config::core::v3::SocketOption::STATE_PREBIND)) {
-    throw CreateListenerException("ListenSocket: Setting socket options failed");
+    throw SocketOptionException("ListenSocket: Setting socket options failed");
   }
 }
 

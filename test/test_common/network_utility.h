@@ -8,7 +8,10 @@
 #include "envoy/network/io_handle.h"
 #include "envoy/network/transport_socket.h"
 
+#include "source/common/network/listen_socket_impl.h"
 #include "source/common/network/utility.h"
+
+#include "gtest/gtest.h"
 
 namespace Envoy {
 namespace Network {
@@ -207,6 +210,17 @@ private:
   const Network::SocketPtr socket_;
   const uint64_t max_rx_datagram_size_;
   std::list<Network::UdpRecvData> received_datagrams_;
+};
+
+/**
+ * A test version of TcpListenSocket that immediately listens which is a common pattern in tests.
+ */
+class TcpListenSocketImmediateListen : public Network::TcpListenSocket {
+public:
+  TcpListenSocketImmediateListen(const Address::InstanceConstSharedPtr& address)
+      : TcpListenSocket(address, nullptr, true) {
+    EXPECT_EQ(0, io_handle_->listen(ENVOY_TCP_BACKLOG_SIZE).rc_);
+  }
 };
 
 } // namespace Test

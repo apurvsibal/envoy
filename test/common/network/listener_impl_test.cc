@@ -32,11 +32,10 @@ static void errorCallbackTest(Address::IpVersion version) {
   Api::ApiPtr api = Api::createApiForTest();
   Event::DispatcherPtr dispatcher(api->allocateDispatcher("test_thread"));
 
-  auto socket = std::make_shared<Network::TcpListenSocket>(
-      Network::Test::getCanonicalLoopbackAddress(version), nullptr, true);
+  auto socket = std::make_shared<Network::Test::TcpListenSocketImmediateListen>(
+      Network::Test::getCanonicalLoopbackAddress(version));
   Network::MockTcpListenerCallbacks listener_callbacks;
-  Network::ListenerPtr listener =
-      dispatcher->createListener(socket, listener_callbacks, true, ENVOY_TCP_BACKLOG_SIZE);
+  Network::ListenerPtr listener = dispatcher->createListener(socket, listener_callbacks, true);
 
   Network::ClientConnectionPtr client_connection = dispatcher->createClientConnection(
       socket->addressProvider().localAddress(), Network::Address::InstanceConstSharedPtr(),
@@ -67,10 +66,8 @@ TEST_P(ListenerImplDeathTest, ErrorCallback) {
 class TestTcpListenerImpl : public TcpListenerImpl {
 public:
   TestTcpListenerImpl(Event::DispatcherImpl& dispatcher, Random::RandomGenerator& random_generator,
-                      SocketSharedPtr socket, TcpListenerCallbacks& cb, bool bind_to_port,
-                      uint32_t tcp_backlog = ENVOY_TCP_BACKLOG_SIZE)
-      : TcpListenerImpl(dispatcher, random_generator, std::move(socket), cb, bind_to_port,
-                        tcp_backlog) {}
+                      SocketSharedPtr socket, TcpListenerCallbacks& cb, bool bind_to_port)
+      : TcpListenerImpl(dispatcher, random_generator, std::move(socket), cb, bind_to_port) {}
 
   MOCK_METHOD(Address::InstanceConstSharedPtr, getLocalAddress, (os_fd_t fd));
 };
@@ -108,7 +105,7 @@ TEST_P(TcpListenerImplTest, SetListeningSocketOptionsError) {
       .WillOnce(Return(false));
   EXPECT_THROW_WITH_MESSAGE(
       TestTcpListenerImpl(dispatcherImpl(), random_generator, socket, listener_callbacks, true),
-      CreateListenerException,
+      SocketOptionException,
       fmt::format("cannot set post-listen socket option on socket: {}",
                   socket->addressProvider().localAddress()->asString()));
 }
@@ -155,11 +152,10 @@ TEST_P(TcpListenerImplTest, GlobalConnectionLimitEnforcement) {
 
   Runtime::LoaderSingleton::getExisting()->mergeValues(
       {{"overload.global_downstream_max_connections", "2"}});
-  auto socket = std::make_shared<Network::TcpListenSocket>(
-      Network::Test::getCanonicalLoopbackAddress(version_), nullptr, true);
+  auto socket = std::make_shared<Network::Test::TcpListenSocketImmediateListen>(
+      Network::Test::getCanonicalLoopbackAddress(version_));
   Network::MockTcpListenerCallbacks listener_callbacks;
-  Network::ListenerPtr listener =
-      dispatcher_->createListener(socket, listener_callbacks, true, ENVOY_TCP_BACKLOG_SIZE);
+  Network::ListenerPtr listener = dispatcher_->createListener(socket, listener_callbacks, true);
 
   std::vector<Network::ClientConnectionPtr> client_connections;
   std::vector<Network::ConnectionPtr> server_connections;

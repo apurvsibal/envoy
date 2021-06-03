@@ -233,6 +233,7 @@ private:
     uint64_t workers_pending_removal_;
   };
 
+  bool doFinalPreWorkerListenerInit(ListenerImpl& listener);
   void addListenerToWorker(Worker& worker, absl::optional<uint64_t> overridden_listener,
                            ListenerImpl& listener, ListenerCompletionCallback completion_callback);
 
@@ -240,9 +241,6 @@ private:
   static ListenerManagerStats generateStats(Stats::Scope& scope);
   static bool hasListenerWithAddress(const ListenerList& list,
                                      const Network::Address::Instance& address);
-  static bool
-  shareSocketWithOtherListener(const ListenerList& list,
-                               const Network::ListenSocketFactorySharedPtr& socket_factory);
   void updateWarmingActiveGauges() {
     // Using set() avoids a multiple modifiers problem during the multiple processes phase of hot
     // restart.
@@ -295,7 +293,7 @@ private:
   void setNewOrDrainingSocketFactory(const std::string& name,
                                      const envoy::config::core::v3::Address& proto_address,
                                      ListenerImpl& listener, bool reuse_port);
-  Network::ListenSocketFactorySharedPtr
+  Network::ListenSocketFactoryPtr
   createListenSocketFactory(const envoy::config::core::v3::Address& proto_address,
                             ListenerImpl& listener, bool reuse_port);
 

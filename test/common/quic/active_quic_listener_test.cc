@@ -111,7 +111,7 @@ protected:
     listen_socket_->addOptions(Network::SocketOptionFactory::buildRxQueueOverFlowOptions());
 
     ON_CALL(listener_config_, listenSocketFactory()).WillByDefault(ReturnRef(socket_factory_));
-    ON_CALL(socket_factory_, getListenSocket()).WillByDefault(Return(listen_socket_));
+    ON_CALL(socket_factory_, getListenSocket(_)).WillByDefault(Return(listen_socket_));
 
     // Use UdpGsoBatchWriter to perform non-batched writes for the purpose of this test, if it is
     // supported.
@@ -346,7 +346,7 @@ TEST_P(ActiveQuicListenerTest, FailSocketOptionUponCreation) {
                               ActiveQuicListenerFactoryPeer::runtimeEnabled(
                                   static_cast<ActiveQuicListenerFactory*>(listener_factory_.get())),
                               quic_stat_names_, 32u, crypto_stream_factory, proof_source_factory),
-                          Network::CreateListenerException, "Failed to apply socket options.");
+                          Network::SocketOptionException, "Failed to apply socket options.");
 }
 
 TEST_P(ActiveQuicListenerTest, ReceiveCHLO) {
